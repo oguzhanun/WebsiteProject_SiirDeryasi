@@ -28,4 +28,10 @@ public interface SiirDao {
 
 	void setUye(Uye uye);
 
+	Uye getUye(String kullaniciAdi);
+
+	void uyeSil(String user);
+
+	void setOnay(String kullaniciAdi, int i);
+
 }

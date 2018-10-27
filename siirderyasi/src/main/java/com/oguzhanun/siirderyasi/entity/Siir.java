@@ -34,6 +34,10 @@ public class Siir {
 	@Column(name="muzik")
 	private String muzik;
 	
+	@Column(name="resim")
+	private String resim;
+	
+	
 	public Siir() {
 		
 	}
@@ -100,5 +104,12 @@ public class Siir {
 	public String toString() {
 		return "Siir [id=" + id + ", siirAdi=" + siirAdi + ", tiklama=" + tiklama + "]";
 	}
+
+	public void setResim(String resim) {
+		this.resim = resim;
+	}
 	
+	public String getResim() {
+		return resim;
+	}
 }

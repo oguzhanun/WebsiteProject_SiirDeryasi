@@ -26,4 +26,12 @@ public interface SiirService {
 
 	void setUye(Uye uye);
 
+	VerificationToken findToken(String token);
+
+	Uye getUye(String kullaniciAdi);
+
+	void uyeSil(String kullaniciAdi);
+
+	void setOnay(String kullaniciAdi, int i);
+
 }

@@ -9,9 +9,12 @@
 	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>Şiir Deryasına Hoşgeldiniz</title>
+		
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 		<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+		
 		<style type="text/css">
 			body{
 				box-sizing:border-box;
@@ -20,7 +23,16 @@
 			.errors{
 				color:red;
 			}
+			.error {
+			  color: red;
+			  margin-left: 5px;
+			}
+			 
+			label.error {
+			  display: inline;
+			}
 		</style>
+		
 		<link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
 	</head>
 	<body style="background-color:black;">
@@ -75,20 +87,22 @@
 		      </div>
 		      <div class="modal-body">
 		        <div>
-		        	<form action="${pageContext.request.contextPath}/uyeKayit" method="POST" autoComplete="off">
+		        	<form action="${pageContext.request.contextPath}/uyeKayit" id="form" method="POST" autoComplete="off">
 		        		<div class="form-group">
 		        			<label for="email">Email :</label>
 		        			<input type="text" autoComplete="off" name="email" id="email" class="form-control">
-		        			
+		        			<br>
 		        			<label for="isim">İsminiz :</label>
 		        			<input type="text" autoComplete="off" name="isim" id="isim" class="form-control">
 		        		</div>
 		        		<div>
 					        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-					        <button type="submit" class="btn btn-primary">Tamam</button>
+					        <button type="submit" id="tamam" class="btn btn-primary">Tamam</button>
 					        <br>
 					        <small style="font-size:12px;">* Aktivasyon için mail adresinize gelen linke tıklamanız gerekmektedir.</small>
 			     		</div>
+			     		<div id="error">
+                		</div>
 		      		</form>
 		      	</div>
 		    </div>
@@ -111,7 +125,7 @@
 				<div class="col-8 card my-4 border-0 p-0 text-white" >
 					<div class="card-deck   " >
 						<div class="card mr-3 " style=" background-color:black">
-							<img class="card-img-top" style="height:350px;" src="https://images.pexels.com/photos/556416/pexels-photo-556416.jpeg?auto=compress&cs=tinysrgb&h=350">
+							<img class="card-img-top" style="height:350px;" src="${resim}">
 							<button id="play" class="btn btn-success" style="position:absolute; z-index:1;" ><i class="fas fa-volume-up"></i></button>
 							
 							<div class="card-body ">
@@ -249,10 +263,11 @@
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 	    -->
 	    <script>
+			$(document).ready(function() {
 	    	
-	    	$(document).ready(function() {
-	    		
-	    		$('#modalButton').click(function(){
+		    	$('#modalButton').click(function(){
+		    		$('.error').remove();
+		    		$('.errors').remove();
 	 				$('#exampleModal').modal('show');	
 	 			});
 	 	
@@ -297,8 +312,6 @@
 		        	}
 	        	});
 		        
-		        
-		        
 		        $('#pause').click(function() {
 		            audioElement.pause();
 		            $("#status").text("Status: Paused");
@@ -307,20 +320,35 @@
 		        $('#restart').click(function() {
 		            audioElement.currentTime = 0;
 		        });
+	    	
+		        
+		        
+		    	$('#form').submit(function(a){
+		    		
+		    		var email = $('#email').val();
+		    		var isim = $('#isim').val();
+		    		
+		    		if(email.length < 1){
+		    			a.preventDefault();
+		    			$('#email').after('<span class="error"> Bu alanın doldurulması zorunludur.</span>');
+		    		} else{
+			    		var regEx= /^([0-9a-zA-Z]([-_\\.]*[0-9a-zA-Z]+)*)@([0-9a-zA-Z]([-_\\.]*[0-9a-zA-Z]+)*)[\\.]([a-zA-Z]{2,9})$/;
+			    		var emailMi = regEx.test(email);
+			    		
+			    		if(!emailMi){
+			    			a.preventDefault();
+			    			$('#email').after('<span class="error">Geçerli bir email adresi giriniz.</span>');
+			    		}
+		    		}
+		    		
+		    		if(isim.length<1){
+		    			a.preventDefault();
+		    			$('#isim').after('<span class="error">Bu alanın doldurulması zorunludur.</span>')
+		    		}
+		    	});
 		    });
 	    	
-		   /* $(document).ready(function(){
-	    		
-	    		$("#gosterKapa").click(function(){
-	    			
-	    			var oldText = $("#gosterKapa").text();
-	    			
-	    			var newText = $(this).data('text');
-	    			
-	    			$("#gosterKapa").text(newText).data('text',oldText);
-	    		});
-	    	});
-	    	*/
+		  
 	    </script>
 	    
 	    

@@ -125,8 +125,11 @@ public class SiirDaoImpl implements SiirDao {
 		tokenQuery.setParameter("token",token);
 		System.out.println(token);
 		List<VerificationToken> tokenList = tokenQuery.getResultList();
-		
-		return tokenList.get(0);
+		if(!tokenList.isEmpty()) {
+			VerificationToken vt = tokenList.get(0);
+			return vt;
+		} else
+			return null;
 	}
 
 	@Override
@@ -149,5 +152,41 @@ public class SiirDaoImpl implements SiirDao {
 	public void setUye(Uye uye) {
 		Session session = sessionFactory.getCurrentSession();
 		session.saveOrUpdate(uye);
+	}
+
+	@Override
+	public Uye getUye(String kullaniciAdi) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		Query<Uye> query = session.createQuery("from Uye where email=:email",Uye.class);
+		query.setParameter("email", kullaniciAdi);
+		Uye uye = query.getSingleResult();
+		
+		return uye;
+	}
+	
+	@Override
+	public void uyeSil(String uye) {
+		
+		Session session = sessionFactory.getCurrentSession();
+		System.out.println("kullanıcı adı = "+ uye);
+		
+		Query queryUye = session.createQuery("delete from Uye where email=:email");
+		queryUye.setParameter("email", uye);
+		queryUye.executeUpdate();
+		
+		Query queryVerificationToken = session.createQuery("delete from VerificationToken where email=:email");
+		queryVerificationToken.setParameter("email",uye);
+		queryVerificationToken.executeUpdate();	
+	}
+
+	@Override
+	public void setOnay(String kullaniciAdi, int i) {
+
+		Session session = sessionFactory.getCurrentSession();
+		Query query = session.createQuery("update Uye set onayli=:i where email=:email ");
+		query.setParameter("email", kullaniciAdi);
+		query.setParameter("i", i);
+		query.executeUpdate();
 	}
 }

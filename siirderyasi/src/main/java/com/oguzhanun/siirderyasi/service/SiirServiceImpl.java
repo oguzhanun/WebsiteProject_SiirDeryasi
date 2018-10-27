@@ -85,4 +85,32 @@ public class SiirServiceImpl implements SiirService {
 		siirDao.setUye(uye);
 	}
 
+	@Override
+	@Transactional
+	public VerificationToken findToken(String token) {
+		
+		return siirDao.findToken(token);
+	}
+
+	@Override
+	@Transactional
+	public Uye getUye(String kullaniciAdi) {
+		
+		return siirDao.getUye(kullaniciAdi);
+	}
+
+	@Override
+	@Transactional
+	public void uyeSil(String kullaniciAdi) {
+
+		siirDao.uyeSil(kullaniciAdi);
+	}
+
+	@Override
+	@Transactional
+	public void setOnay(String kullaniciAdi, int i) {
+		
+		siirDao.setOnay(kullaniciAdi,i);
+	}
+
 }

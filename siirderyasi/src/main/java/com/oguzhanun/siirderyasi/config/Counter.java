@@ -4,12 +4,16 @@ package com.oguzhanun.siirderyasi.config;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -18,6 +22,7 @@ import com.oguzhanun.siirderyasi.service.SiirService;
 
 
 @Component
+@PropertySource("classpath:siirler.properties")
 public class Counter extends HandlerInterceptorAdapter {
 	
 	
@@ -33,6 +38,7 @@ public class Counter extends HandlerInterceptorAdapter {
 	 * geri dönen rakam baz alınarak session a göre önceki işlemler tekrar edilecek
 	 * 
 	 * */
+	
 	private static Object obj = new Object();
 	
 	private int count ;
@@ -41,23 +47,21 @@ public class Counter extends HandlerInterceptorAdapter {
 	
 	private static Set<String> tiklananlarListesi;
 	
-	private static List<String> liste;
-	
 	private Siir siir;
+	
+	@Value("#{'${siirler}'.split(',')}")
+	List<String> siirListesi;
+	
+	@Value("#{${users}}")
+	private Map<String,String> users;
+	
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 			
-		liste = new ArrayList<>();
-		liste.add("/anasayfa/SensizOlmuyor");
-		liste.add("/anasayfa/BrehBreh");
-		liste.add("/anasayfa/Test-2");
-		liste.add("/anasayfa/Test-2-html");
-		liste.add("/anasayfa/BirZamanlarBenDe");
-		liste.add("/anasayfa/YalinKilicCiktimYola");
-		
-		//siirService = new SiirServiceImpl();
+		System.out.println("şiir link adı =" +siirListesi.get(3)+ "-------");
+		System.out.println("users=" + users.get("test1"));
 		
 		System.out.println("merhaba televole...");
 		
@@ -69,7 +73,7 @@ public class Counter extends HandlerInterceptorAdapter {
 		System.out.println(request.getSession().getAttribute(servletPath));
 		
 		//anasayfa istendiğinde tiklama sayıları daha oluşturulmamış durumda nullpointer verir
-		if(liste.contains(servletPath)) {
+		if(siirListesi.contains(servletPath)) {
 			
 			siirAdi = servletPath.substring(10);
 			System.out.println("Şiir Adı ="+ siirAdi);
@@ -97,23 +101,6 @@ public class Counter extends HandlerInterceptorAdapter {
 		}
 		
 		return super.preHandle(request, response, obj);
-		
-//		switch (servletPath){
-//			case "/sensizOlmuyor": request.getSession().setAttribute("/sensizOlmuyor", artır);
-//				break;
-//			case "/brehBreh": request.getSession().setAttribute("/brehBreh", artır2);
-//				break;
-//		}
-//		switch (servletPath){
-//			case "/sensizOlmuyor":  
-//				if( ((Integer) request.getSession().getAttribute("/sensizOlmuyor")) < Integer.valueOf(2)) {
-//					count = count+1;
-//					artır = artır+1;
-//				}
-//				break;
-//			case "/brehBreh" : 
-//				break;
-//		}
 	}
 
 	public int getCount() {

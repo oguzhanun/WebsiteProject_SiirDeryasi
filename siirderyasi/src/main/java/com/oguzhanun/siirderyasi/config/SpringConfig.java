@@ -12,9 +12,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -42,6 +45,7 @@ public class SpringConfig implements WebMvcConfigurer{
 	//autowire ile enjekte edilmediğinde kullandığı autowire lı bean ler nullpointer hatasına yol açıyor...
 	@Autowired
 	private Counter counter;
+	
 	
 	@Bean
 	public ViewResolver viewResolver() {
@@ -163,4 +167,21 @@ public class SpringConfig implements WebMvcConfigurer{
 		return resolver;
 	}
 
+	@Bean
+	public TaskExecutor threadPoolTaskExecutor() {
+		
+		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+		executor.setCorePoolSize(4);
+		executor.setMaxPoolSize(4);
+		executor.setThreadNamePrefix("default_task_executor_thread");
+		executor.initialize();
+		
+		return executor;
+	}
+	
+	//To resolve ${} in @Value
+		@Bean
+		public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+			return new PropertySourcesPlaceholderConfigurer();
+		}
 }

@@ -1,6 +1,8 @@
 package com.oguzhanun.siirderyasi.config;
 
 
+import javax.servlet.Filter;
+
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 
@@ -24,4 +26,9 @@ public class MySpringMvcDispatcherServletInitializer extends AbstractAnnotationC
 		return new String[] {"/"};
 	}
 
+	@Override
+	protected Filter[] getServletFilters() {
+		
+		return new Filter[] { new EncodingFilter()};
+	}
 }

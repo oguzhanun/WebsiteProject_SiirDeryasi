@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,9 +20,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.oguzhanun.siirderyasi.config.Counter;
+
 import com.oguzhanun.siirderyasi.entity.Siir;
 import com.oguzhanun.siirderyasi.entity.Uye;
+import com.oguzhanun.siirderyasi.entity.VerificationToken;
 import com.oguzhanun.siirderyasi.event.OnRegistrationCompleteEvent;
 import com.oguzhanun.siirderyasi.service.SiirService;
 
@@ -34,19 +36,14 @@ public class MainController {
 	private SiirService siirService;
 	
 	@Autowired
-	private Counter counter;
+	private ApplicationEventPublisher applicationEventPublisher;
 	
 	@Autowired
-	private ApplicationEventPublisher applicationEventPublisher;
+	private TaskExecutor taskExecutor;
 	
 	
 	@RequestMapping("/anasayfa")
 	public String anasayfa(Model model) {
-		
-//		long l = Counter.count;
-//		String s = Long.toString(l);
-//		model.addAttribute("count", s);
-
 		
 		// veri tabanındaki tüm şiirler tıklama sayısına göre çekilecek
 		// tiklama sayısı en fazla olan şiirin adresi iframe e gidecek (${siirAdres})
@@ -65,7 +62,9 @@ public class MainController {
 			model.addAttribute("siirAdi",siir.getSiirAdi());
 			System.out.println("şiir adı ="+siir.getSiirAdi());
 			
-			model.addAttribute("muzikDosyasi", "/siirderyasi/resources/muzik/mp3indirdur-Mabel-Matiz-Sarmasik.mp3");
+			model.addAttribute("muzikDosyasi", siir.getMuzik());
+			
+			model.addAttribute("resim",siir.getResim());
 			
 			//Dosya adresi Counter sınıfı üzerinden gelen siir nesnesinden alınacak...
 			String siirAdres = siir.getAdres();
@@ -110,6 +109,8 @@ public class MainController {
 		//Müzik dosyasını yüklüyoruz...
 		model.addAttribute("muzikDosyasi", "https://muzikmp3indir.com/mp3?t=1539703406&v=40332&h=9eaa4310f42081484681230c260335ba");
 		
+		model.addAttribute("resim",siir.getResim());
+		
 		//Dosya adresi Counter sınıfı üzerinden gelen siir nesnesinden alınacak...
 		String siirAdres = siir.getAdres();
 		siirAdres = siirAdres.substring(69);
@@ -130,20 +131,14 @@ public class MainController {
 	
 	@RequestMapping("/siirIsle")
 	public String siirIsle( @RequestParam("dosya") MultipartFile dosya, 
-							@RequestParam("siirAdi") String siirAdi, @RequestParam("siirLinkAdi") String siirLinkAdi, @RequestParam("muzik") String muzik, HttpServletRequest request ) {
+							@RequestParam("siirAdi") String siirAdi, @RequestParam("siirLinkAdi") String siirLinkAdi,
+							@RequestParam("muzik") String muzik,@RequestParam("resim") String resim, HttpServletRequest request ) {
 		
-		//siirService.siirEkle(siir);
-//		Part part = null;
-//		try {
-//			part = request.getPart("dosya");
-//		} catch (IOException | ServletException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		System.out.println("şiir adı :" + siirAdi);
 		System.out.println("müzik dosyası :"+ muzik);
 		System.out.println("siir link adı :"+ siirLinkAdi);
 		System.out.println("dosya :" + dosya);
+		System.out.println("resim :" + resim);
 		
 		String siirlerPath = request.getSession().getServletContext().getRealPath("/siirler");
 		System.out.println("siirlerPath = " + siirlerPath);
@@ -153,29 +148,18 @@ public class MainController {
 		if(dosya != null) {
 			try {
 				byte[] siirDosyasi = dosya.getBytes();
-				//URI uri = new URI("")
-				//URL path = 
-				//System.out.println(path);
 				
-				file = new File("/Users/mustafaoguzhanun/eclipse-workspace/siirderyasi/src/main/webapp/resources/siirler" + "/" + dosya.getOriginalFilename()); //"classpath:/siirler/"+ dosya.getOriginalFilename() 
+				file = new File("/Users/mustafaoguzhanun/eclipse-workspace/siirderyasi/src/main/webapp/resources/siirler" + "/" 
+						+ dosya.getOriginalFilename()); //"classpath:/siirler/"+ dosya.getOriginalFilename() 
 				System.out.println("file = " + file);
 				
 				file.createNewFile();
-				
-				//String path2 =  path + "/" + dosya.getOriginalFilename();//ResourceUtils.getFile("/siirler").getAbsolutePath()
-				//System.out.println("path2: " + path2);
-				
-//				if(!file.exists()) {
-//					file.mkdir();
-//					
-//				}
 				
 				OutputStream fos = new FileOutputStream(file);
 				fos.write(siirDosyasi);
 				fos.close();
 				
 				} catch (IOException e) {
-
 					e.printStackTrace();
 				}
 			}
@@ -186,6 +170,7 @@ public class MainController {
 		siir.setTiklama(0);
 		siir.setMuzik(muzik);
 		siir.setSiirLinkAdi(siirLinkAdi);
+		siir.setResim(resim);
 		siirService.siirEkle(siir);
 		
 		//dosya adı, şiir adı ve tıklanma sayısı ile veri tabanı kayıt işlemi yapılacak
@@ -230,7 +215,7 @@ public class MainController {
 				
 				System.out.println("kullanıcı var...");
 				
-				return "anasayfa";
+				return "redirect:/anasayfa";
 		} 
 			
 		//HERŞEY YOLUNDA İSE KAYIT İŞLEMİNİ GERÇEKLEŞTİR
@@ -243,58 +228,77 @@ public class MainController {
 			uye.setIsim(isim);
 			uye.setOnayli(onayli);
 			
+			String appUrl = request.getContextPath();
+			System.out.println("context path alındı...");
 			
 			// BAŞKA BİR THREAD E GEÇMEK TE FAYDA VAR BURADA MAIL GÖNDERİMİ SIRASINDA YAVAŞLAMA OLUYOR...
-			try {
-				
-				String appUrl = request.getContextPath();
-				System.out.println("context path alındı...");
-				applicationEventPublisher.publishEvent(new OnRegistrationCompleteEvent(uye, request.getLocale(), appUrl));
-				System.out.println("event publish edildi...");
-			}catch(Exception exc) {
-				exc.printStackTrace();
-				return "uyeOlustur"; //Başka bir sayfa daha sonra buraya yapılması gerekiyor...
-			}
+			taskExecutor.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						applicationEventPublisher.publishEvent(new OnRegistrationCompleteEvent(uye, request.getLocale(), appUrl));
+						System.out.println("event publish edildi...");
+					}catch(Exception exc) {
+						exc.printStackTrace();
+						//return "uyeOlustur"; //Başka bir sayfa daha sonra buraya yapılması gerekiyor...
+					}
+				}
+			});
 			
 			//Müşteri veritabanını da burada oluşturuyoruz...
 			siirService.setUye(uye);
 
-			return "anasayfa";
+			return "redirect:/anasayfa";
 		}
+	}
+
+	@RequestMapping("/uyeOnay/{token}")
+	public String uyeOnay(@PathVariable("token") String token, Model model) {
+		
+		VerificationToken vt;
+		
+		if((vt = siirService.findToken(token)) != null){
+			
+			if(System.currentTimeMillis() < vt.getExpiryDate().getTime()) {
+				String kullaniciAdi = vt.getEmail();
+				
+				siirService.setOnay(kullaniciAdi, 1);
+			
+				return "redirect:/anasayfa";
+			
+			} else {
+				
+				String kullaniciAdi = vt.getEmail();
+				
+				siirService.uyeSil(kullaniciAdi);
+				
+				return "zamanAsimi";} //ÜYELİK BİLGİLERİNİN SİLİNMESİ DE GEREKİYOR MUTLAKA...
+			
+		} else
+
+			return "hataliToken";
+	}
+	
+	@RequestMapping("/uyeSil/{token}")
+	public String uyeSil(@PathVariable("token") String token, Model model) {
+		
+		VerificationToken vt;
+		
+		if((vt = siirService.findToken(token)) != null){
+			
+			String kullaniciAdi = vt.getEmail();
+				
+			siirService.uyeSil(kullaniciAdi);
+			
+			return "uyeSilindi";
+		} else
+		
+		return "silmeHatasi";
+			
+		
 	}
 }
 
 
-
-
-//@RequestMapping("/sensizOlmuyor")
-//public String sensizOlmuyor(HttpServletRequest request, HttpServletResponse response, Model model) {
-//	
-//	long l = Counter.count;
-//	String s = Long.toString(l);
-//	
-//	long l2 = Counter.count2;
-//	String s2 = Long.toString(l2);
-//
-//	model.addAttribute("count", s);
-//	model.addAttribute("count2", s2);
-//	
-//	return "sensizOlmuyor";
-//}
-//
-//@RequestMapping("/brehBreh")
-//public String brehBreh(HttpServletRequest request, HttpServletResponse response, Model model) {
-//	
-//	long l = Counter.count;
-//	String s = Long.toString(l);
-//	
-//	long l2 = Counter.count2;
-//	String s2 = Long.toString(l2);
-//	
-//	model.addAttribute("count", s);
-//	model.addAttribute("count2", s2);
-//
-//	return "brehBreh";
-//}
 
 ///Kullanıcılar/mustafaoguzhanun/.m2

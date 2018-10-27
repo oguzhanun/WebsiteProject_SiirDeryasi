@@ -50,7 +50,14 @@ public class RegistrationListener implements ApplicationListener<OnRegistrationC
         String recipientAddress = email;
         String subject = "Registration Confirmation";
         String confirmationUrl = "http://localhost:9090"+ event.getAppUrl() + "/uyeOnay/" + token;
-        message = env.getProperty("message.regSucc") + "\n\n" + confirmationUrl + "\n Bu url'nin gönderilmesini siz sağlamadıysanız, bu maili dikkate almayınız..."; 
+        String deletionUrl = "http://localhost:9090" + event.getAppUrl() + "/uyeSil/" + token;
+        
+        message = //env.getProperty("message.regSucc")
+        		
+        		  "Üyelik başvurunuzu tamamlamak için aşağıdaki linke tıklamanız gerekmektedir."+ "\n\n"
+        		  + confirmationUrl 
+        		  + "\n\nBu link'in gönderilmesini siz sağlamadıysanız, lütfen mail'i dikkate almayınız."
+        		  + "\n\nÜyeliğinizi silmek için aşağıdaki link'e tıklamanız gerekmektedir. \n" + deletionUrl; 
 
         try {
             //CommonsMultipartFile attachFileObj; @RequestParam ile metod argümanı olarak gelen nesne... Jsp sayfasından alınmış örnekte...

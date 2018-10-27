@@ -30,8 +30,12 @@
 					<label>Müzik Dosyası Adresi :</label>
 					<input type="text" class="form-control" id="muzik" name="muzik"  />
 					<br><br>
+					
+					<label>Resim Dosyası Adresi :</label>
+					<input type="text" class="form-control" id="resim" name="resim"  />
+					<br><br>
 				
-				    <label for="dosya">Dosya seçin :</label>
+				    <label for="dosya">Text Dosyası Adresi :</label>
 				    <input type="file" class="form-control-file" id="dosya" name="dosya">
 		  		
 					<br><br>
