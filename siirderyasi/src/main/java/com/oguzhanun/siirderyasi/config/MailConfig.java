@@ -20,8 +20,8 @@ public class MailConfig {
         
         //javaMailSender.setHost("smtp.gmail.com");
         javaMailSender.setPort(465);
-        javaMailSender.setUsername("mustafaun.1001@gmail.com");
-        javaMailSender.setPassword("16mart2008");
+        javaMailSender.setUsername("**********@gmail.com");
+        javaMailSender.setPassword("**********");
         javaMailSender.setDefaultEncoding("utf-8");
         
     
